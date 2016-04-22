@@ -10,9 +10,9 @@ public class Inventory : MonoBehaviour
     bool inventoryOpen = false;
     List<GameObject> itemsInRange = new List<GameObject>();
     List<GameObject> stonesInRange = new List<GameObject>();
+    List<GameObject> woodInRange = new List<GameObject>();
     bool delay = false;
-
-
+    
     void Start()
     {
         
@@ -46,6 +46,10 @@ public class Inventory : MonoBehaviour
         {
             itemsInRange.Add(other.gameObject);
         }
+        else if (GetComponent<Equip>().holdingItem == "Hatchet" && other.gameObject.tag == "Wood")
+        {
+            woodInRange.Add(other.gameObject);
+        }
     }
 
     void OnTriggerExit(Collider other)
@@ -58,52 +62,69 @@ public class Inventory : MonoBehaviour
         {
             itemsInRange.Remove(other.gameObject);
         }
+        else if (GetComponent<Equip>().holdingItem == "Hatchet" && other.gameObject.tag == "Wood")
+        {
+            woodInRange.Remove(other.gameObject);
+        }
+    }
+
+    GameObject findNearest(List<GameObject> listToSearch)
+    {
+        GameObject nearest = null;
+        float distance = float.MaxValue;
+        for (int i = 0; i < listToSearch.Count; i++)
+        {
+            if (Vector3.Distance(listToSearch[i].transform.position, transform.position) < distance)
+            {
+                distance = Vector3.Distance(listToSearch[i].transform.position, transform.position);
+                nearest = listToSearch[i];
+            }
+        }
+        return nearest;
     }
 
     void OnGUI()
     {
-        if (itemsInRange.Count > 0 && !delay && GetComponent<Equip>().holdingItem == "")
+        if (!delay)
         {
-            GameObject nearest = null;
-            float distance = float.MaxValue;
-            for(int i = 0; i < itemsInRange.Count; i++)
+            if (itemsInRange.Count > 0 && GetComponent<Equip>().holdingItem == "")
             {
-                if(Vector3.Distance(itemsInRange[i].transform.position, transform.position) < distance)
+                GameObject nearest = findNearest(itemsInRange);
+                GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to pickup " + nearest.name);
+                if (Input.GetKeyDown(KeyCode.F))
                 {
-                    distance = Vector3.Distance(itemsInRange[i].transform.position, transform.position);
-                    nearest = itemsInRange[i];
+                    delay = true;
+                    itemsInRange.Remove(nearest);
+                    inventoryItems.Add(nearest.GetComponent<Items>());
+                    Destroy(nearest);
                 }
             }
-            GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to pickup " + nearest.name);
-            if(Input.GetKeyDown(KeyCode.F))
+            else if (stonesInRange.Count > 0 && GetComponent<Equip>().holdingItem == "Pickaxe")
             {
-                delay = true;
-                itemsInRange.Remove(nearest);
-                inventoryItems.Add(nearest.GetComponent<Items>());
-                Destroy(nearest);
-            }
-        }
-        else if(stonesInRange.Count > 0 && !delay && GetComponent<Equip>().holdingItem == "Pickaxe")
-        {
-            GameObject nearest = null;
-            float distance = float.MaxValue;
-            for (int i = 0; i < stonesInRange.Count; i++)
-            {
-                if (Vector3.Distance(stonesInRange[i].transform.position, transform.position) < distance)
+                GameObject nearest = findNearest(stonesInRange);
+                GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to mine " + nearest.name);
+                if (Input.GetKeyDown(KeyCode.F))
                 {
-                    distance = Vector3.Distance(stonesInRange[i].transform.position, transform.position);
-                    nearest = stonesInRange[i];
+                    delay = true;
+                    stonesInRange.Remove(nearest);
+                    inventoryItems.Add(nearest.GetComponent<Items>());
+                    Destroy(nearest);
                 }
             }
-            GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to mine " + nearest.name);
-            if (Input.GetKeyDown(KeyCode.F))
+            else if (woodInRange.Count > 0 && GetComponent<Equip>().holdingItem == "Hatchet")
             {
-                delay = true;
-                stonesInRange.Remove(nearest);
-                inventoryItems.Add(nearest.GetComponent<Items>());
-                Destroy(nearest);
+                GameObject nearest = findNearest(woodInRange);
+                GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to chop " + nearest.name);
+                if (Input.GetKeyDown(KeyCode.F))
+                {
+                    delay = true;
+                    woodInRange.Remove(nearest);
+                    inventoryItems.Add(nearest.GetComponent<Items>());
+                    Destroy(nearest);
+                }
             }
         }
+
         if (inventoryOpen)
         {
             for(int i = 0; i < inventoryItems.Count; i++)
