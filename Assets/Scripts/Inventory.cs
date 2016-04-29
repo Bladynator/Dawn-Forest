@@ -3,7 +3,7 @@ using System.Collections;
 using UnityStandardAssets.Characters.FirstPerson;
 using System.Collections.Generic;
 
-public class Inventory : MonoBehaviour 
+public class Inventory : MonoBehaviour
 {
     List<Items> inventoryItems = new List<Items>();
     public Texture2D tempTexture;
@@ -12,23 +12,36 @@ public class Inventory : MonoBehaviour
     List<GameObject> stonesInRange = new List<GameObject>();
     List<GameObject> woodInRange = new List<GameObject>();
     bool delay = false;
-    
+    Equip equip;
+
     void Start()
     {
-        
+        equip = GameObject.Find("FPSController").GetComponent<Equip>();
     }
-	
-	void Update () 
-	{
-		if(Input.GetButtonDown("Inventory"))
+
+    void Update()
+    {
+        if (Input.GetButtonDown("Inventory"))
         {
             inventoryOpen = !inventoryOpen;
+            if (inventoryOpen)
+            {
+                GameObject.Find("FPSController").GetComponent<FirstPersonController>().enabled = false;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                GameObject.Find("FPSController").GetComponent<FirstPersonController>().enabled = true;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
-        if(delay)
+        if (delay)
         {
             StartCoroutine(Delay());
         }
-	}
+    }
 
     IEnumerator Delay()
     {
@@ -38,15 +51,15 @@ public class Inventory : MonoBehaviour
     // trigger again after de-equip
     void OnTriggerEnter(Collider other)
     {
-        if(GetComponent<Equip>().holdingItem == "Pickaxe" && other.gameObject.tag == "Stone")
+        if (GetComponent<Equip>().holdingItemName == "Pickaxe" && other.gameObject.tag == "Stone")
         {
             stonesInRange.Add(other.gameObject);
         }
-        else if(other.gameObject.tag == "Item")
+        else if (other.gameObject.tag == "Item")
         {
             itemsInRange.Add(other.gameObject);
         }
-        else if (GetComponent<Equip>().holdingItem == "Hatchet" && other.gameObject.tag == "Wood")
+        else if (GetComponent<Equip>().holdingItemName == "Hatchet" && other.gameObject.tag == "Wood")
         {
             woodInRange.Add(other.gameObject);
         }
@@ -54,7 +67,7 @@ public class Inventory : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (GetComponent<Equip>().holdingItem == "Pickaxe" && other.gameObject.tag == "Stone")
+        if (GetComponent<Equip>().holdingItemName == "Pickaxe" && other.gameObject.tag == "Stone")
         {
             stonesInRange.Remove(other.gameObject);
         }
@@ -62,7 +75,7 @@ public class Inventory : MonoBehaviour
         {
             itemsInRange.Remove(other.gameObject);
         }
-        else if (GetComponent<Equip>().holdingItem == "Hatchet" && other.gameObject.tag == "Wood")
+        else if (GetComponent<Equip>().holdingItemName == "Hatchet" && other.gameObject.tag == "Wood")
         {
             woodInRange.Remove(other.gameObject);
         }
@@ -87,7 +100,7 @@ public class Inventory : MonoBehaviour
     {
         if (!delay)
         {
-            if (itemsInRange.Count > 0 && GetComponent<Equip>().holdingItem == "")
+            if (itemsInRange.Count > 0 && GetComponent<Equip>().holdingItemName == "")
             {
                 GameObject nearest = findNearest(itemsInRange);
                 GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to pickup " + nearest.name);
@@ -99,7 +112,7 @@ public class Inventory : MonoBehaviour
                     Destroy(nearest);
                 }
             }
-            else if (stonesInRange.Count > 0 && GetComponent<Equip>().holdingItem == "Pickaxe")
+            else if (stonesInRange.Count > 0 && GetComponent<Equip>().holdingItemName == "Pickaxe")
             {
                 GameObject nearest = findNearest(stonesInRange);
                 GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to mine " + nearest.name);
@@ -111,7 +124,7 @@ public class Inventory : MonoBehaviour
                     Destroy(nearest);
                 }
             }
-            else if (woodInRange.Count > 0 && GetComponent<Equip>().holdingItem == "Hatchet")
+            else if (woodInRange.Count > 0 && GetComponent<Equip>().holdingItemName == "Hatchet")
             {
                 GameObject nearest = findNearest(woodInRange);
                 GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to chop " + nearest.name);
@@ -127,24 +140,35 @@ public class Inventory : MonoBehaviour
 
         if (inventoryOpen)
         {
-            for(int i = 0; i < inventoryItems.Count; i++)
+            for (int i = 0; i < inventoryItems.Count; i++)
             {
                 if (GUI.Button(new Rect(i * 50, 50, 50, 50), inventoryItems[i].thisTexture))
                 {
                     inventoryItems[i].Activate();
-                    GameObject.Find("FPSController").GetComponent<Equip>().holdingItem = inventoryItems[i].itemName;
-                    inventoryItems.RemoveAt(i);
+                    if (inventoryItems[i].type == 0)
+                    {
+                        if (equip.holdingItemName != "")
+                        {
+                            inventoryItems.Add(equip.itemHolding);
+                        }
+                        equip.holdingItemName = inventoryItems[i].itemName;
+                        equip.itemHolding = inventoryItems[i];
+                        inventoryItems.RemoveAt(i);
+                        equip.SimulateHolding();
+                    }
                 }
             }
-            GameObject.Find("FPSController").GetComponent<FirstPersonController>().enabled = false;
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            GameObject.Find("FPSController").GetComponent<FirstPersonController>().enabled = true;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+
+            if (equip.holdingItemName != "")
+            {
+                if (GUI.Button(new Rect(Screen.width / 1.3f, Screen.height / 2, 75, 75), equip.itemHolding.thisTexture))
+                {
+                    inventoryItems.Add(equip.itemHolding);
+                    equip.holdingItemName = "";
+                    equip.itemHolding = null;
+                    Destroy(equip.tempHolding);
+                }
+            }
         }
     }
 }

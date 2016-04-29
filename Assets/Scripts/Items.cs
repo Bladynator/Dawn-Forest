@@ -1,20 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Items : MonoBehaviour 
+public class Items : MonoBehaviour
 {
     public Texture2D thisTexture;
     public string itemName;
+    public int type; // 0 = tool, 1 = material
 
-    void Start () 
-	{
-		
-	}
-	
-	void Update () 
-	{
-		
-	}
+    void Start()
+    {
+
+    }
+
+    void Update()
+    {
+
+    }
 
     public virtual void Activate()
     {
