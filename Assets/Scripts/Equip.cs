@@ -38,6 +38,11 @@ public class Equip : MonoBehaviour
                     tempHolding = Instantiate(toolsToHold[1]);
                     break;
                 }
+            case "Torch":
+                {
+                    tempHolding = Instantiate(toolsToHold[2]);
+                    break;
+                }
         }
     }
 }

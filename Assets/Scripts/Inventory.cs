@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Inventory : MonoBehaviour
 {
-    List<Items> inventoryItems = new List<Items>();
+    public List<Items> inventoryItems = new List<Items>();
     public Texture2D tempTexture;
     bool inventoryOpen = false;
     List<GameObject> itemsInRange = new List<GameObject>();
@@ -45,7 +45,7 @@ public class Inventory : MonoBehaviour
 
     IEnumerator Delay()
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         delay = false;
     }
     // trigger again after de-equip
@@ -107,9 +107,13 @@ public class Inventory : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.F))
                 {
                     delay = true;
-                    itemsInRange.Remove(nearest);
                     inventoryItems.Add(nearest.GetComponent<Items>());
-                    Destroy(nearest);
+                    nearest.GetComponent<Items>().amount--;
+                    if(nearest.GetComponent<Items>().amount <= 0)
+                    {
+                        itemsInRange.Remove(nearest);
+                        Destroy(nearest);
+                    }
                 }
             }
             else if (stonesInRange.Count > 0 && GetComponent<Equip>().holdingItemName == "Pickaxe")
@@ -119,9 +123,13 @@ public class Inventory : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.F))
                 {
                     delay = true;
-                    stonesInRange.Remove(nearest);
                     inventoryItems.Add(nearest.GetComponent<Items>());
-                    Destroy(nearest);
+                    nearest.GetComponent<Items>().amount--;
+                    if (nearest.GetComponent<Items>().amount <= 0)
+                    {
+                        stonesInRange.Remove(nearest);
+                        Destroy(nearest);
+                    }
                 }
             }
             else if (woodInRange.Count > 0 && GetComponent<Equip>().holdingItemName == "Hatchet")
@@ -131,9 +139,13 @@ public class Inventory : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.F))
                 {
                     delay = true;
-                    woodInRange.Remove(nearest);
                     inventoryItems.Add(nearest.GetComponent<Items>());
-                    Destroy(nearest);
+                    nearest.GetComponent<Items>().amount--;
+                    if (nearest.GetComponent<Items>().amount <= 0)
+                    {
+                        woodInRange.Remove(nearest);
+                        Destroy(nearest);
+                    }
                 }
             }
         }
@@ -150,6 +162,7 @@ public class Inventory : MonoBehaviour
                         if (equip.holdingItemName != "")
                         {
                             inventoryItems.Add(equip.itemHolding);
+                            Destroy(equip.tempHolding);
                         }
                         equip.holdingItemName = inventoryItems[i].itemName;
                         equip.itemHolding = inventoryItems[i];
