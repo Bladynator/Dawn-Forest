@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityStandardAssets.Characters.FirstPerson;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class Crafting : MonoBehaviour
 {
@@ -32,8 +33,12 @@ public class Crafting : MonoBehaviour
         {0,0},{0,0},{0,0},{0,0},{0,0},
         {0,0},{0,0},{0,0},{0,0},{0,0}};
     [SerializeField]
-    Items[] allItems;
-
+    Items[] allItemsToMake;
+    [SerializeField]
+    GameObject canvas, toMake;
+    Button[] allButtons;
+    Button[] allButtons2;
+    
     void Update()
     {
         if (Input.GetButtonDown("Crafting"))
@@ -44,99 +49,93 @@ public class Crafting : MonoBehaviour
                 GameObject.Find("FPSController").GetComponent<FirstPersonController>().enabled = false;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
+                canvas.SetActive(true);
+                allButtons = GameObject.Find("Types").GetComponentsInChildren<Button>();
+                for(int i = 0; i < allButtons.Length; i++)
+                {
+                    Buttons(i);
+                }
+                //GameObject.Find("ButtonLight").GetComponent<Button>().onClick.Invoke();
             }
             else
             {
                 GameObject.Find("FPSController").GetComponent<FirstPersonController>().enabled = true;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
+                canvas.SetActive(false);
             }
         }
     }
 
-    void OnGUI()
+    void Buttons(int i)
     {
-        if (craftingOpen)
+        allButtons[i].GetComponentInChildren<Text>().text = names[i];
+        allButtons[i].onClick.AddListener(delegate { MakeButton(i); });
+    }
+
+    void Buttons2(int i, int p)
+    {
+        allButtons2[i].GetComponentInChildren<Text>().text = namesTab[p, i];
+        allButtons2[i].onClick.AddListener(delegate { PressedObject(p, i); });
+    }
+    
+    void MakeButton(int p)
+    {
+        craftTabOpen = p;
+        allButtons2 = GameObject.Find("ObjectsButtons").GetComponentsInChildren<Button>();
+        for (int i = 0; i < allButtons.Length; i++)
         {
-            if (craftTabOpen != -1)
-            {
-                int openItem = 0;
-                for (int i = 0; i < 5; i++)
-                {
-                    if (GUI.Button(new Rect(100, 0 + (i * 50), 100, 50), namesTab[craftTabOpen, i]))
-                    {
-                        craftOpen = openItem;
-                        item = i;
-                    }
-                    openItem++;
-                }
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                if (GUI.Button(new Rect(0, 0 + (i * 50), 100, 50), names[i]))
-                {
-                    if (craftTabOpen == i)
-                    {
-                        craftTabOpen = -1;
-                    }
-                    else
-                    {
-                        craftTabOpen = i;
-                    }
-                }
-            }
-            
-            if (craftOpen != -1)
-            {
-                GUI.DrawTexture(new Rect(200, 100, Screen.width - 400, Screen.height - 200), background);
-                if (GUI.Button(new Rect(200, 100, 100, 50), "Back"))
-                {
-                    craftOpen = -1;
-                }
-                GUI.Label(new Rect(Screen.width / 2 - 25, 100, 100, 25), namesTab[craftTabOpen, item]);
-                GUI.TextArea(new Rect(220, 150, Screen.width - 440, 100), itemInformation[craftTabOpen, item], smallFont);
-                if (GUI.Button(new Rect(Screen.width / 2 - 50, Screen.height - 150, 100, 50), "Craft") && CheckIfEnoughRecources())
-                {
-                    RemoveRecourses();
-                    GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems.Add(allItems[craftOpen]);
-                }
-            }
+            Buttons2(i, p);
         }
     }
 
-    void RemoveRecourses()
+    void PressedObject(int i, int p)
     {
-        List<Items> allItems = GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems;
-        int wood = requirementsForCrafting[craftOpen, 0], stone = requirementsForCrafting[craftOpen, 1];
-        for(int i = 0; i < allItems.Count; i++)
+        toMake.SetActive(true);
+        Text[] allText = toMake.GetComponentsInChildren<Text>();
+        allText[0].text = namesTab[i, p];
+        allText[1].text = itemInformation[i, p];
+        craftOpen = i;
+        item = p;
+    }
+
+    public void RemoveRecourses()
+    {
+        if (CheckIfEnoughRecources())
         {
-            switch (allItems[i].itemName)
+            List<Items> allItems = GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems;
+            int wood = requirementsForCrafting[craftOpen, 0], stone = requirementsForCrafting[craftOpen, 1];
+            for (int i = 0; i < allItems.Count; i++)
             {
-                case "Wood":
-                    {
-                        if (wood > 0)
+                switch (allItems[i].itemName)
+                {
+                    case "Wood":
                         {
-                            wood--;
-                            GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems.RemoveAt(i);
-                            i = 0;
+                            if (wood > 0)
+                            {
+                                wood--;
+                                GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems.RemoveAt(i);
+                                i = 0;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                case "Stone":
-                    {
-                        if (wood > 0)
+                    case "Stone":
                         {
-                            stone--;
-                            GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems.RemoveAt(i);
-                            i = 0;
+                            if (wood > 0)
+                            {
+                                stone--;
+                                GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems.RemoveAt(i);
+                                i = 0;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
+                    default:
+                        {
+                            break;
+                        }
+                }
             }
+            GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems.Add(allItemsToMake[craftOpen]);
         }
     }
 
@@ -165,6 +164,7 @@ public class Crafting : MonoBehaviour
                     }
             }
         }
+
         if(requirementsForCrafting[craftOpen, 0] > wood || requirementsForCrafting[craftOpen, 1] > stone)
         {
             enough = false;

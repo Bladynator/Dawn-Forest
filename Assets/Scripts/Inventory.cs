@@ -104,7 +104,7 @@ public class Inventory : MonoBehaviour
             {
                 GameObject nearest = findNearest(itemsInRange);
                 GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to pickup " + nearest.name);
-                if (Input.GetKeyDown(KeyCode.F))
+                if (Input.GetKeyDown(KeyCode.F))  
                 {
                     delay = true;
                     inventoryItems.Add(nearest.GetComponent<Items>());
