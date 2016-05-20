@@ -14,18 +14,13 @@ public class Crafting : MonoBehaviour
         { "1", "Small Campfire", "Big Campfire", "4", "5" }, 
         { "2", "Small Campfire", "Big Campfire", "4", "5" }, 
         { "3", "Small Campfire", "Big Campfire", "4", "5" }};
-    int craftTabOpen = -1; // -1 = off
     int craftOpen = -1; // -1 = off
-    [SerializeField]
-    Texture2D background;
-    int item;
     string[,] itemInformation = new string[5, 5]
     { { "Bring your own light", "Small Campfire", "Big Campfire", "4", "5" },
         { "Pickaxe", "Hachet", "Shovel", "4", "5" },
         { "1", "Small Campfire", "Big Campfire", "4", "5" },
         { "2", "Small Campfire", "Big Campfire", "4", "5" },
         { "3", "Small Campfire", "Big Campfire", "4", "5" }};
-    GUIStyle smallFont = new GUIStyle();
     int[,] requirementsForCrafting = new int[25, 2] // wood, stone
     { {3,0},{0,0},{0,0},{0,0},{0,0},
         {0,0},{0,0},{0,0},{0,0},{0,0},
@@ -38,6 +33,8 @@ public class Crafting : MonoBehaviour
     GameObject canvas, toMake;
     Button[] allButtons;
     Button[] allButtons2;
+    [SerializeField]
+    Sprite[] mats;
     
     void Update()
     {
@@ -55,7 +52,7 @@ public class Crafting : MonoBehaviour
                 {
                     Buttons(i);
                 }
-                //GameObject.Find("ButtonLight").GetComponent<Button>().onClick.Invoke();
+                GameObject.Find("ButtonLight").GetComponent<Button>().onClick.Invoke();
             }
             else
             {
@@ -81,7 +78,6 @@ public class Crafting : MonoBehaviour
     
     void MakeButton(int p)
     {
-        craftTabOpen = p;
         allButtons2 = GameObject.Find("ObjectsButtons").GetComponentsInChildren<Button>();
         for (int i = 0; i < allButtons.Length; i++)
         {
@@ -93,10 +89,16 @@ public class Crafting : MonoBehaviour
     {
         toMake.SetActive(true);
         Text[] allText = toMake.GetComponentsInChildren<Text>();
+        Image[] allMats = toMake.GetComponentsInChildren<Image>();
         allText[0].text = namesTab[i, p];
         allText[1].text = itemInformation[i, p];
+
+        allText[3].text = requirementsForCrafting[i, 0].ToString();
+        allMats[2].sprite = mats[0];
+
+        allText[4].text = requirementsForCrafting[i, 1].ToString();
+        allMats[3].sprite = mats[1];
         craftOpen = i;
-        item = p;
     }
 
     public void RemoveRecourses()
