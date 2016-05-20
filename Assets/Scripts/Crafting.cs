@@ -59,6 +59,7 @@ public class Crafting : MonoBehaviour
                 GameObject.Find("FPSController").GetComponent<FirstPersonController>().enabled = true;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
+                toMake.SetActive(false);
                 canvas.SetActive(false);
             }
         }
@@ -79,7 +80,7 @@ public class Crafting : MonoBehaviour
     void MakeButton(int p)
     {
         allButtons2 = GameObject.Find("ObjectsButtons").GetComponentsInChildren<Button>();
-        for (int i = 0; i < allButtons.Length; i++)
+        for (int i = 0; i < allButtons2.Length; i++)
         {
             Buttons2(i, p);
         }
