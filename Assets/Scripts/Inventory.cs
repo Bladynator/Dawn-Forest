@@ -122,6 +122,7 @@ public class Inventory : MonoBehaviour
                 GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to mine " + nearest.name);
                 if (Input.GetKeyDown(KeyCode.F))
                 {
+                    GetComponent<Equip>().DamageTool(10);
                     delay = true;
                     inventoryItems.Add(nearest.GetComponent<Items>());
                     nearest.GetComponent<Items>().amount--;
@@ -138,6 +139,7 @@ public class Inventory : MonoBehaviour
                 GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 300, 100), "Press F to chop " + nearest.name);
                 if (Input.GetKeyDown(KeyCode.F))
                 {
+                    GetComponent<Equip>().DamageTool(10);
                     delay = true;
                     inventoryItems.Add(nearest.GetComponent<Items>());
                     nearest.GetComponent<Items>().amount--;
@@ -176,12 +178,21 @@ public class Inventory : MonoBehaviour
             {
                 if (GUI.Button(new Rect(Screen.width / 1.3f, Screen.height / 2, 75, 75), equip.itemHolding.thisTexture))
                 {
-                    inventoryItems.Add(equip.itemHolding);
-                    equip.holdingItemName = "";
-                    equip.itemHolding = null;
-                    Destroy(equip.tempHolding);
+                    DeequipTool();
                 }
             }
         }
+    }
+
+    public void DeequipTool(bool destroyed = false)
+    {
+        if (!destroyed)
+        {
+            inventoryItems.Add(equip.itemHolding);
+        }
+        equip.holdingItemName = "";
+        equip.itemHolding = null;
+        Destroy(equip.tempHolding);
+        equip.tempHolding = null;
     }
 }

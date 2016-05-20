@@ -14,19 +14,19 @@ public class Crafting : MonoBehaviour
         { "1", "Small Campfire", "Big Campfire", "4", "5" }, 
         { "2", "Small Campfire", "Big Campfire", "4", "5" }, 
         { "3", "Small Campfire", "Big Campfire", "4", "5" }};
-    int craftOpen = -1; // -1 = off
+    int craftOpen = -1, itemToMake = -1; // -1 = off
     string[,] itemInformation = new string[5, 5]
     { { "Bring your own light", "Small Campfire", "Big Campfire", "4", "5" },
         { "Pickaxe", "Hachet", "Shovel", "4", "5" },
         { "1", "Small Campfire", "Big Campfire", "4", "5" },
         { "2", "Small Campfire", "Big Campfire", "4", "5" },
         { "3", "Small Campfire", "Big Campfire", "4", "5" }};
-    int[,] requirementsForCrafting = new int[25, 2] // wood, stone
-    { {3,0},{0,0},{0,0},{0,0},{0,0},
-        {0,0},{0,0},{0,0},{0,0},{0,0},
-        {0,0},{0,0},{0,0},{0,0},{0,0},
-        {0,0},{0,0},{0,0},{0,0},{0,0},
-        {0,0},{0,0},{0,0},{0,0},{0,0}};
+    int[,,] requirementsForCrafting = new int[5, 5, 2] // wood, stone
+    { { {3,0},{4,0},{0,0},{0,0},{0,0} }, 
+        { {3,0},{5,0},{0,0},{0,0},{0,0} }, 
+        { {3,0},{0,0},{0,0},{0,0},{0,0} }, 
+        { {3,0},{0,0},{0,0},{0,0},{0,0} }, 
+        { {3,0},{0,0},{0,0},{0,0},{0,0} } };
     [SerializeField]
     Items[] allItemsToMake;
     [SerializeField]
@@ -94,12 +94,13 @@ public class Crafting : MonoBehaviour
         allText[0].text = namesTab[i, p];
         allText[1].text = itemInformation[i, p];
 
-        allText[3].text = requirementsForCrafting[i, 0].ToString();
+        allText[3].text = requirementsForCrafting[i, p, 0].ToString();
         allMats[2].sprite = mats[0];
 
-        allText[4].text = requirementsForCrafting[i, 1].ToString();
+        allText[4].text = requirementsForCrafting[i, p, 1].ToString();
         allMats[3].sprite = mats[1];
         craftOpen = i;
+        itemToMake = p;
     }
 
     public void RemoveRecourses()
@@ -107,7 +108,7 @@ public class Crafting : MonoBehaviour
         if (CheckIfEnoughRecources())
         {
             List<Items> allItems = GameObject.Find("FPSController").GetComponent<Inventory>().inventoryItems;
-            int wood = requirementsForCrafting[craftOpen, 0], stone = requirementsForCrafting[craftOpen, 1];
+            int wood = requirementsForCrafting[craftOpen, itemToMake, 0], stone = requirementsForCrafting[craftOpen, itemToMake, 1];
             for (int i = 0; i < allItems.Count; i++)
             {
                 switch (allItems[i].itemName)
@@ -168,7 +169,7 @@ public class Crafting : MonoBehaviour
             }
         }
 
-        if(requirementsForCrafting[craftOpen, 0] > wood || requirementsForCrafting[craftOpen, 1] > stone)
+        if(requirementsForCrafting[craftOpen, itemToMake, 0] > wood || requirementsForCrafting[craftOpen, itemToMake, 1] > stone)
         {
             enough = false;
         }

@@ -5,7 +5,6 @@ public class Tool : Items
 {
     bool holding = false;
     
-	
 	void Start () 
 	{
 		

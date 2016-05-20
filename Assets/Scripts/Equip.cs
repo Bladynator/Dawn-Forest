@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Equip : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class Equip : MonoBehaviour
     GameObject[] toolsToHold;
     public GameObject tempHolding;
     Transform hand;
+    [SerializeField]
+    Text DuraText;
 
     void Start()
     {
@@ -21,6 +24,24 @@ public class Equip : MonoBehaviour
         {
             tempHolding.transform.position = hand.transform.position;
             tempHolding.transform.rotation = hand.transform.rotation;
+            DuraText.text = "Durability Left: " + itemHolding.durability.ToString() + "%";
+            if (itemHolding.durability <= 0)
+            {
+                GameObject.Find("FPSController").GetComponent<Inventory>().DeequipTool(true);
+            }
+        }
+        else
+        {
+            DuraText.text = "";
+        }
+    }
+
+    public void DamageTool(float damage)
+    {
+        if (tempHolding != null)
+        {
+            //tempHolding.GetComponent<Tool>().durability -= damage;
+            itemHolding.durability -= damage;
         }
     }
 
